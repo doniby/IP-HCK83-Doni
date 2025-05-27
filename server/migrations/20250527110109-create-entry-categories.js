@@ -15,7 +15,7 @@ module.exports = {
         primaryKey: true,
         references: {
           model: "Entries",
-          key: "entry_id",
+          key: "id",
         },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
@@ -26,7 +26,7 @@ module.exports = {
         primaryKey: true,
         references: {
           model: "Categories",
-          key: "category_id",
+          key: "id",
         },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
