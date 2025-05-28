@@ -1,6 +1,5 @@
 "use strict";
 const { Model } = require("sequelize");
-const { hashPassword } = require("../helpers/bcryptjs");
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     /**
@@ -9,49 +8,65 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
-      User.hasMany(models.Entry, {
-        foreignKey: "UserId",
-        onDelete: "CASCADE",
-        onUpdate: "CASCADE",
-      });
-      User.hasMany(models.Category, {
-        foreignKey: "UserId",
-        onDelete: "CASCADE",
-        onUpdate: "CASCADE",
-      });
-      
+      User.hasMany(models.Entry, { foreignKey: "UserId" });
+      User.hasMany(models.Transaction, { foreignKey: "UserId" });
     }
   }
   User.init(
     {
       username: {
         type: DataTypes.STRING,
-        allowNull: false,
-        unique: true,
-        validate: {
-          notEmpty: true,
-          notNull: true,
-          len: [3, 50],
+        allowNull: true,
+        unique: {
+          msg: "Username already in use",
         },
       },
       email: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
+        unique: {
+          msg: "Email address already in use",
+        },
         validate: {
-          isEmail: true,
-          notEmpty: true,
-          notNull: true,
-          len: [3, 50],
+          isEmail: {
+            msg: "Must be a valid email address",
+          },
+          notEmpty: {
+            msg: "Email is required",
+          },
+          notNull: {
+            msg: "Email is required",
+          },
         },
       },
       password: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
-          notEmpty: true,
-          notNull: true,
+          notEmpty: {
+            msg: "Password is required",
+          },
+          notNull: {
+            msg: "Password is required",
+          },
+          len: [6, 100],
+        },
+      },
+      tier: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: "free",
+        validate: {
+          isIn: {
+            args: [["free", "premium"]],
+            msg: "Invalid tier",
+          },
+          notEmpty: {
+            msg: "Tier is required",
+          },
+          notNull: {
+            msg: "Tier is required",
+          },
         },
       },
     },
@@ -60,9 +75,10 @@ module.exports = (sequelize, DataTypes) => {
       modelName: "User",
     }
   );
-  User.addHook("beforeCreate", (user) => {
-    user.password = hashPassword(user.password);
-    return user;
+  User.beforeCreate(async (user) => {
+    const bcrypt = require("bcryptjs");
+    const saltRounds = 10;
+    user.password = await bcrypt.hash(user.password, saltRounds);
   });
   return User;
 };

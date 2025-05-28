@@ -1,18 +1,20 @@
 "use strict";
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-  class Translation extends Model {
+  class Transaction extends Model {
     static associate(models) {
-      Translation.belongsTo(models.Entry, { foreignKey: "EntryId" });
+      Transaction.belongsTo(models.User, { foreignKey: "UserId" });
     }
   }
-  Translation.init(
+  Transaction.init(
     {
-      translatedText: DataTypes.TEXT,
-      EntryId: {
+      orderId: DataTypes.STRING,
+      status: DataTypes.STRING,
+      redirectUrl: DataTypes.STRING,
+      UserId: {
         type: DataTypes.INTEGER,
         references: {
-          model: "Entries",
+          model: "Users",
           key: "id",
         },
         onUpdate: "CASCADE",
@@ -21,8 +23,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "Translation",
+      modelName: "Transaction",
     }
   );
-  return Translation;
+  return Transaction;
 };
