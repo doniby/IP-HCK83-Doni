@@ -38,6 +38,7 @@ class TransactionController {
         redirectUrl: midtransRes.redirect_url,
       });
     } catch (err) {
+      console.error('Midtrans error:', err);
       next(err);
     }
   }

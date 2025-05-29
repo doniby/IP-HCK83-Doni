@@ -66,6 +66,50 @@ class UserController {
       next(error);
     }
   }
+
+  static async GoogleLogin(req, res, next) {
+    try {
+      const { credential } = req.body;
+      const { OAuth2Client } = require("google-auth-library");
+      const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+      // Verify Google token
+      const ticket = await client.verifyIdToken({
+        idToken: credential,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+      const payload = ticket.getPayload();
+      const email = payload.email;
+      const username = payload.name;
+
+      // Find or create user
+      let user = await User.findOne({ where: { email } });
+      if (!user) {
+        user = await User.create({
+          username,
+          email,
+          password: Math.random().toString(36).slice(-8),
+        });
+        await Category.create({ name: "general", UserId: user.id });
+      }
+
+      // Generate JWT
+      const jwtPayload = { id: user.id, tier: user.tier };
+      const token = require("jsonwebtoken").sign(jwtPayload, process.env.JWT_SECRET);
+
+      res.status(200).json({
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          tier: user.tier,
+          access_token: token,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = UserController;

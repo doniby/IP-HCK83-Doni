@@ -80,5 +80,12 @@ module.exports = (sequelize, DataTypes) => {
     const saltRounds = 10;
     user.password = await bcrypt.hash(user.password, saltRounds);
   });
+  User.beforeUpdate(async (user) => {
+    if (user.changed("password")) {
+      const bcrypt = require("bcryptjs");
+      const saltRounds = 10;
+      user.password = await bcrypt.hash(user.password, saltRounds);
+    }
+  });
   return User;
 };

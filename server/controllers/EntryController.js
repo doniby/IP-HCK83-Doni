@@ -14,16 +14,17 @@ class EntryController {
       const userId = req.user.id;
       const user = await User.findByPk(userId);
       if (!user) {
-        return res.status(404).json({ message: "User not found" });
+        throw { status: 404, message: "User not found" };
       }
       if (user.tier !== "premium") {
         const entryCount = await Entry.count({
           where: { UserId: userId },
         });
         if (entryCount >= 20) {
-          return res
-            .status(403)
-            .json({ message: "Entry limit reached for non-premium users" });
+          throw {
+            status: 403,
+            message: "Entry limit reached for non-premium users",
+          };
         }
       }
       const newEntry = await Entry.create({
@@ -98,7 +99,7 @@ class EntryController {
           entry.Categories.some((cat) => cat.id == categoryId)
         );
       }
-      res.send(200).json(entries);
+      res.status(200).json(entries);
     } catch (error) {
       next(error);
     }
