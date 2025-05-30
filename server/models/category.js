@@ -6,15 +6,29 @@ module.exports = (sequelize, DataTypes) => {
       Category.belongsToMany(models.Entry, { through: models.EntryCategory });
       Category.belongsTo(models.User, { foreignKey: "UserId" });
     }
-  }
-  Category.init(
+  }  Category.init(
     {
-      name: DataTypes.STRING,
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: {
+            msg: "Category name is required",
+          },
+        },
+      },
       UserId: DataTypes.INTEGER,
     },
     {
       sequelize,
       modelName: "Category",
+      indexes: [
+        {
+          unique: true,
+          fields: ['name', 'UserId'],
+          name: 'unique_category_per_user'
+        }
+      ]
     }
   );
   return Category;

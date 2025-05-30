@@ -11,9 +11,11 @@ module.exports = {
       },
       orderId: {
         type: Sequelize.STRING,
+        allowNull: false,
       },
       UserId: {
         type: Sequelize.INTEGER,
+        allowNull: false,
         references: {
           model: "Users",
           key: "id",
@@ -23,6 +25,14 @@ module.exports = {
       },
       status: {
         type: Sequelize.STRING,
+        allowNull: false,
+      },
+      amount: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        validate: {
+          min: 1,
+        },
       },
       redirectUrl: {
         type: Sequelize.TEXT,

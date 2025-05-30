@@ -30,6 +30,17 @@ This document describes the available API endpoints, their request/response stru
 - **Possible Errors:**
   - `400 Bad Request` — Invalid Google credential
 
+### PUT `/user/profile`
+- **Headers:** `Authorization: Bearer <token>`
+- **Request Body:** `{ username?, email?, password? }`
+- **Success Response:**
+  - `200 OK`
+  - `{ message, user: { id, username, email, tier } }`
+- **Possible Errors:**
+  - `401 Unauthorized` — Missing/invalid token
+  - `400 Bad Request` — No fields provided or invalid data
+  - `404 Not Found` — User not found
+
 ---
 
 ## Entries
@@ -142,20 +153,6 @@ This document describes the available API endpoints, their request/response stru
   - `{ message }`
 - **Possible Errors:**
   - `400 Bad Request` — Invalid notification
-
----
-
-## User Profile (if implemented)
-
-### PUT `/user/profile`
-- **Headers:** `Authorization: Bearer <token>`
-- **Request Body:** `{ email?, username?, password? }`
-- **Success Response:**
-  - `200 OK`
-  - `{ user }`
-- **Possible Errors:**
-  - `401 Unauthorized` — Missing/invalid token
-  - `400 Bad Request` — Invalid fields
 
 ---
 

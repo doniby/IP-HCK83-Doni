@@ -10,10 +10,12 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       name: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false
       },
       UserId: {
         type: Sequelize.INTEGER,
+        allowNull: false,
         references: {
           model: "Users",
           key: "id"
@@ -29,6 +31,11 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE
       }
+    });
+    await queryInterface.addConstraint('Categories', {
+      fields: ['name', 'UserId'],
+      type: 'unique',
+      name: 'unique_category_per_user'
     });
   },
   async down(queryInterface, Sequelize) {

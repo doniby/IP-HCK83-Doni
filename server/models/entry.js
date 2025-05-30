@@ -10,8 +10,24 @@ module.exports = (sequelize, DataTypes) => {
   }
   Entry.init(
     {
-      content: DataTypes.TEXT,
-      type: DataTypes.STRING,
+      content: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+        validate: {
+          notEmpty: {
+            msg: "Content is required",
+          },
+        },
+      },
+      type: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: {
+            msg: "Type is required",
+          },
+        },
+      },
       UserId: {
         type: DataTypes.INTEGER,
         references: {

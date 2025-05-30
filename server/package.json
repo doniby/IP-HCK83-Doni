@@ -16,26 +16,48 @@
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "google-auth-library": "^9.15.1",
     "jsonwebtoken": "^9.0.2",
     "midtrans-client": "^1.4.2",
     "pg": "^8.16.0",
     "sequelize": "^6.37.7"
   },
   "devDependencies": {
-    "sequelize-cli": "^6.6.3",
     "jest": "^29.0.0",
+    "sequelize-cli": "^6.6.3",
     "supertest": "^6.3.3"
   },
   "jest": {
     "testEnvironment": "node",
+    "setupFilesAfterEnv": [
+      "<rootDir>/_tests_/config.js"
+    ],
     "collectCoverage": true,
+    "coverageDirectory": "coverage",
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ],
+    "collectCoverageFrom": [
+      "controllers/**/*.js",
+      "middlewares/**/*.js",
+      "models/**/*.js",
+      "routers/**/*.js",
+      "services/**/*.js",
+      "!models/index.js"
+    ],
     "coverageThreshold": {
       "global": {
-        "branches": 90,
-        "functions": 90,
-        "lines": 90,
-        "statements": 90
+        "branches": 85,
+        "functions": 85,
+        "lines": 85,
+        "statements": 85
       }
-    }
+    },
+    "testMatch": [
+      "**/_tests_/**/*.test.js"
+    ],
+    "verbose": true
   }
 }

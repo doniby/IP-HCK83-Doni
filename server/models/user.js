@@ -2,11 +2,6 @@
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate(models) {
       User.hasMany(models.Entry, { foreignKey: "UserId" });
       User.hasMany(models.Transaction, { foreignKey: "UserId" });
@@ -79,13 +74,6 @@ module.exports = (sequelize, DataTypes) => {
     const bcrypt = require("bcryptjs");
     const saltRounds = 10;
     user.password = await bcrypt.hash(user.password, saltRounds);
-  });
-  User.beforeUpdate(async (user) => {
-    if (user.changed("password")) {
-      const bcrypt = require("bcryptjs");
-      const saltRounds = 10;
-      user.password = await bcrypt.hash(user.password, saltRounds);
-    }
   });
   return User;
 };

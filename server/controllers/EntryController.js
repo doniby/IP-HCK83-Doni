@@ -10,51 +10,63 @@ const geminiTranslate = require("../services/geminiTranslate");
 class EntryController {
   static async create(req, res, next) {
     try {
-      const { content, type, categoryIds, categoryNames } = req.body;
+      const { content, type: reqType, categoryIds, categoryNames } = req.body;
       const userId = req.user.id;
       const user = await User.findByPk(userId);
       if (!user) {
         throw { status: 404, message: "User not found" };
-      }
-      if (user.tier !== "premium") {
+      }      if (user.tier !== "premium") {
         const entryCount = await Entry.count({
           where: { UserId: userId },
         });
-        if (entryCount >= 20) {
+        if (entryCount >= 5) {
           throw {
             status: 403,
             message: "Entry limit reached for non-premium users",
           };
         }
       }
+      // Override type to default 'indonesia_text'
+      const type = 'indonesia_text';
       const newEntry = await Entry.create({
         content,
         type,
         UserId: userId,
       });
+      // Validate content and type
+      if (!content || !content.trim()) {
+        throw { status: 400, message: "Content is required" };
+      }
+      if (!reqType || !reqType.trim()) {
+        throw { status: 400, message: "Type is required" };
+      }
+
       // Generate translation using Gemini API
-      const translatedText = await geminiTranslate(content);
+      let translatedText;
+      // Enhance error handling for translation failures
+      try {
+        translatedText = await geminiTranslate(content);
+        if (!translatedText || !translatedText.trim()) {
+          throw new Error("Translation returned empty text");
+        }
+      } catch (translationError) {
+        console.error("Translation failed:", translationError);
+        const errorDetails = translationError.response?.data || translationError.message;
+        throw {
+          status: 500,
+          message: `Failed to generate translation: ${errorDetails}`,
+        };
+      }
+
       const translation = await Translation.create({
         translatedText,
         EntryId: newEntry.id,
       });
+
       // Assign categories
       let assignedCategoryIds = [];
-      if (Array.isArray(categoryIds) && categoryIds.length > 0) {
-        assignedCategoryIds = categoryIds;
-      } else {
-        // Find or create the user's 'general' category
-        let generalCategory = await Category.findOne({
-          where: { name: "general", UserId: userId },
-        });
-        if (!generalCategory) {
-          generalCategory = await Category.create({
-            name: "general",
-            UserId: userId,
-          });
-        }
-        assignedCategoryIds = [generalCategory.id];
-      }
+      console.log(translation, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+      
       // If categoryNames is provided, create new categories if they don't exist
       if (Array.isArray(categoryNames) && categoryNames.length > 0) {
         for (const name of categoryNames) {
@@ -66,6 +78,20 @@ class EntryController {
           }
           assignedCategoryIds.push(category.id);
         }
+      } else if (Array.isArray(categoryIds) && categoryIds.length > 0) {
+        assignedCategoryIds = categoryIds;
+      } else {
+        // Find or create the user's 'general' category only if no other categories specified
+        let generalCategory = await Category.findOne({
+          where: { name: "general", UserId: userId },
+        });
+        if (!generalCategory) {
+          generalCategory = await Category.create({
+            name: "general",
+            UserId: userId,
+          });
+        }
+        assignedCategoryIds = [generalCategory.id];
       }
       // Remove duplicates
       assignedCategoryIds = [...new Set(assignedCategoryIds)];
@@ -75,6 +101,7 @@ class EntryController {
           CategoryId: categoryId,
         });
       }
+      console.log(translation, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
       res.status(201).json({ entry: newEntry, translation });
     } catch (error) {
       next(error);

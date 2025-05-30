@@ -11,9 +11,11 @@ module.exports = {
       },
       translatedText: {
         type: Sequelize.TEXT,
+        allowNull: false,
       },
       EntryId: {
         type: Sequelize.INTEGER,
+        allowNull: false,
         references: {
           model: "Entries",
           key: "id",

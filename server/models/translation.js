@@ -8,7 +8,15 @@ module.exports = (sequelize, DataTypes) => {
   }
   Translation.init(
     {
-      translatedText: DataTypes.TEXT,
+      translatedText: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+        validate: {
+          notEmpty: {
+            msg: "Translated text is required",
+          },
+        },
+      },
       EntryId: {
         type: DataTypes.INTEGER,
         references: {
